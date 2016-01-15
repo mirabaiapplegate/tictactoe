@@ -14,7 +14,7 @@
     <div class="board-container"></div>
     <div class="game-details">
       <div class="controls">
-        <button class="restart">New Game</button><br />
+        <button class="new-game">New Game</button><br />
         <button class="dogs-and-cats">Dogs &amp; Cats</button><br />
         <button class="x-and-o">Xs &amp; Os</button>
       </div>
@@ -26,6 +26,14 @@
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery.js"></script>
     <script type="text/javascript">
+
+    /* Public: Define the TicTacToe Object.
+    *
+    * $container - jQuery wrapped DOM node that is the main container of the
+    * game board.
+    *
+    * Returns nothing.
+    */
     function TicTacToe($container) {
       this.$container    = $container;
       this.gameWinner    = null;
@@ -43,15 +51,32 @@
       this.board         = this.winningMoves.slice(); // NOTE Duplicate Array
     }
 
+    /* Public: Set up the game.
+    *
+    * Returns nothing.
+    */
     TicTacToe.prototype.setup = function () {
       $('.draw, .winner').hide();
 
-      this.drawBoard();
-      this.bind();
-      this.updateCurrentPlayerStatus();
+      this._drawBoard();
+      this._bind();
+      this._updateCurrentPlayerStatus();
     }
 
-    TicTacToe.prototype.drawBoard = function () {
+    /* Public: Destroy the game board.
+     *
+     * Returns nothing.
+     */
+    TicTacToe.prototype.destroy = function () {
+      this.$container.find('.square').off('click');
+      this.$container.empty();
+    }
+
+    /* Internal: Draw the game board.
+    *
+    * Returns nothing.
+    */
+    TicTacToe.prototype._drawBoard = function () {
       for (var i = 0; i < 3; i++) {
         this.$container.append($('<div>', { class: 'row' }));
       }
@@ -72,12 +97,11 @@
       });
     }
 
-    TicTacToe.prototype.destroy = function () {
-      this.$container.find('.square').off('click');
-      this.$container.empty();
-    }
-
-    TicTacToe.prototype.bind = function () {
+    /* Internal: Bind click events to the squares on the game board.
+    *
+    * Returns nothing.
+    */
+    TicTacToe.prototype._bind = function () {
       var self = this;
       this.$container.on('click', '.row .square', function (event) {
         event.preventDefault();
@@ -85,50 +109,79 @@
         var $square      = $(this);
         var squareNumber = $(this).attr('id').replace(/s\-/, '');
 
-        if(self.gameWinner || self.isDraw || self.squareAlreadyClicked($square)) return;
+        if(self.gameWinner || self.isDraw || self._squareAlreadyClicked($square)) return;
 
-        self.updateSquareTile($square);
-        self.playMove(squareNumber);
-        self.checkForWinner();
+        self._updateSquareTile($square);
+        self._playMove(squareNumber);
+        self._checkForWinner();
 
         if(self.gameWinner) {
-          self.congratulateWinner();
+          self._congratulateWinner();
           return;
         } else if(self.moveCount == 9) {
-          self.draw();
+          self._draw();
           return;
         }
 
-        self.updateCurrentPlayer();
+        self._updateCurrentPlayer();
       });
     }
 
-    TicTacToe.prototype.squareAlreadyClicked = function ($square) {
+    /* Internal: Determine if a square has already been clicked.
+    *
+    * $square - jQuery wrapped DOM node that is the individual move container
+    * of the game board.
+    *
+    * Returns a boolean.
+    */
+    TicTacToe.prototype._squareAlreadyClicked = function ($square) {
       var cssPrefixPlayer1 = this.playerNameMap["X"];
       var cssPrefixPlayer2 = this.playerNameMap["O"];
-      return ($square.hasClass(cssPrefixPlayer1 + '-background-image') || $square.hasClass(cssPrefixPlayer2 + '-background-image'));
+      return ($square.hasClass(cssPrefixPlayer1 + '-background-image') ||
+              $square.hasClass(cssPrefixPlayer2 + '-background-image'));
     }
 
-    TicTacToe.prototype.updateSquareTile = function ($square) {
+    /* Internal: Update the square background image.
+    *
+    * $square - jQuery wrapped DOM node that is the individual move container
+    * of the game board.
+    *
+    * Returns nothing.
+    */
+    TicTacToe.prototype._updateSquareTile = function ($square) {
       var cssPrefix = this.playerNameMap[this.currentPlayer];
       $square.addClass(cssPrefix + '-background-image');
     }
 
-    TicTacToe.prototype.updateCurrentPlayer = function () {
+    /* Internal: Update the current player.
+    *
+    * Returns nothing.
+    */
+    TicTacToe.prototype._updateCurrentPlayer = function () {
       if(this.currentPlayer == 'X') {
         this.currentPlayer = 'O';
       } else if(this.currentPlayer == 'O') {
         this.currentPlayer = 'X';
       }
 
-      this.updateCurrentPlayerStatus();
+      this._updateCurrentPlayerStatus();
     }
 
-    TicTacToe.prototype.updateCurrentPlayerStatus = function () {
+    /* Internal: Update the the current player status.
+    *
+    * Returns nothing.
+    */
+    TicTacToe.prototype._updateCurrentPlayerStatus = function () {
       $('.current-player-status .player-name').text(this.playerNameMap[this.currentPlayer]);
     }
 
-    TicTacToe.prototype.playMove = function (squareNumber) {
+    /* Internal: Handle the player move.
+    *
+    * squareNumber - unique integer representing a single square.
+    *
+    * Returns nothing.
+    */
+    TicTacToe.prototype._playMove = function (squareNumber) {
       for (var i = 0; i < this.board.length; i++) {
         for (var y = 0; y < this.board[i].length; y++) {
           var s = this.board[i][y];
@@ -140,7 +193,11 @@
       this.moveCount += 1;
     }
 
-    TicTacToe.prototype.checkForWinner = function () {
+    /* Internal: Check the board for a winner.
+    *
+    * Returns a boolean or an instance of gameWinner.
+    */
+    TicTacToe.prototype._checkForWinner = function () {
       if (this.moveCount < 5) return false;
 
       for (var i = 0; i < this.board.length; i++) {
@@ -154,41 +211,66 @@
       }
     }
 
-    TicTacToe.prototype.congratulateWinner = function () {
+    /* Internal: Displays text congratulating the winner.
+    *
+    * Returns nothing.
+    */
+    TicTacToe.prototype._congratulateWinner = function () {
       $('.winner .player-name').text(this.playerNameMap[this.gameWinner]);
       $('.winner').show();
     }
 
-    TicTacToe.prototype.draw = function () {
+    /* Internal: Displays text announcing a draw game.
+    *
+    * Returns nothing.
+    */
+    TicTacToe.prototype._draw = function () {
       $('.draw').show();
       this.isDraw = true;
     }
 
+    /* Public: Handle the update the player name.
+    *
+    * player1 - string name of Player1.
+    * player2 - string name of Player2.
+    *
+    * Returns nothing.
+    */
     TicTacToe.prototype.updatePlayerNames = function (player1, player2) {
-      this.updateBoardImages(player1, player2);
+      this._updateBoardImages(player1, player2);
       this.playerNameMap['X'] = player1;
       this.playerNameMap['O'] = player2;
-      this.updateCurrentPlayerStatus();
+      this._updateCurrentPlayerStatus();
     };
 
-    TicTacToe.prototype.updateBoardImages = function (player1, player2) {
+    /* Internal: Update the background images on the board.
+    *
+    * player1 - string name of Player1.
+    * player2 - string name of Player2.
+    *
+    * Returns nothing.
+    */
+    TicTacToe.prototype._updateBoardImages = function (player1, player2) {
       var player1CSS = this.playerNameMap['X'] + '-background-image';
       var player2CSS = this.playerNameMap['O'] + '-background-image';
       this.$container.find(".square." + player1CSS).removeClass(player1CSS).addClass(player1 + "-background-image");
       this.$container.find(".square." + player2CSS).removeClass(player2CSS).addClass(player2 + "-background-image");
     }
 
+    /* On DOM ready set up the game board.
+    */
     $(document).ready(function() {
       var game = new TicTacToe($('.board-container'));
       game.setup();
 
       function clearBoard () {
         game.destroy();
+
         game = new TicTacToe($('.board-container'));
         game.setup();
       }
 
-      $('.restart').click(clearBoard);
+      $('.new-game').click(clearBoard);
       $('.dogs-and-cats').click(function () { game.updatePlayerNames("Dogs", "Cats"); });
       $('.x-and-o').click(function () { game.updatePlayerNames("X", "O"); });
     });
