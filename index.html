@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Tic Tac Toe</title>
+    <link rel="stylesheet" href="animate.css">
+    <link rel="stylesheet" type="text/css" href="index.css">
+  </head>
+  <body>
+    <h1> Tic Tac Toe </h1>
+    <h4> by Mirabai Applegate </h4>
+    <h2 class="winner animated bounceInLeft game-message" style="display: none;"><span class="player-name"></span> Won! </h2>
+    <h2 class="draw animated bounceInLeft game-message" style="display: none;">It's a draw!</h2>
+    <div class="board-container"></div>
+    <div class="game-details">
+      <div class="controls">
+        <button class="restart">New Game</button><br />
+        <button class="dogs-and-cats">Dogs &amp; Cats</button><br />
+        <button class="x-and-o">Xs &amp; Os</button>
+      </div>
+      <div class="current-player-status">
+        Current Player: <span class="player-name">X</span>
+      </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <script type="text/javascript">
+    function TicTacToe($container) {
+      this.$container    = $container;
+      this.gameWinner    = null;
+      this.isDraw        = false;
+      this.currentPlayer = 'X';
+      this.moveCount     = 0;
+      this.playerNameMap = {
+        X: "X",
+        O: "O"
+      }
+      this.winningMoves  = [
+        [0,1,2], [3,4,5], [6,7,8], [0,3,6],
+        [1,4,7], [2,5,8], [0,4,8], [2,4,6]
+      ];
+      this.board         = this.winningMoves.slice(); // NOTE Duplicate Array
+    }
+
+    TicTacToe.prototype.setup = function () {
+      $('.draw, .winner').hide();
+
+      this.drawBoard();
+      this.bind();
+      this.updateCurrentPlayerStatus();
+    }
+
+    TicTacToe.prototype.drawBoard = function () {
+      for (var i = 0; i < 3; i++) {
+        this.$container.append($('<div>', { class: 'row' }));
+      }
+
+      this.$container.find('.row').each(function() {
+        var $this = $(this);
+
+        for(var i = 0; i < 3; i++) {
+          var $square = $('<a>', {
+            class: 'square'
+          });
+          $this.append($square);
+        };
+      });
+
+      this.$container.find('.square').each(function(index) {
+        $(this).attr('id', 's-' + index);
+      });
+    }
+
+    TicTacToe.prototype.destroy = function () {
+      this.$container.find('.square').off('click');
+      this.$container.empty();
+    }
+
+    TicTacToe.prototype.bind = function () {
+      var self = this;
+      this.$container.on('click', '.row .square', function (event) {
+        event.preventDefault();
+
+        var $square      = $(this);
+        var squareNumber = $(this).attr('id').replace(/s\-/, '');
+
+        if(self.gameWinner || self.isDraw || self.squareAlreadyClicked($square)) return;
+
+        self.updateSquareTile($square);
+        self.playMove(squareNumber);
+        self.checkForWinner();
+
+        if(self.gameWinner) {
+          self.congratulateWinner();
+          return;
+        } else if(self.moveCount == 9) {
+          self.draw();
+          return;
+        }
+
+        self.updateCurrentPlayer();
+      });
+    }
+
+    TicTacToe.prototype.squareAlreadyClicked = function ($square) {
+      var cssPrefixPlayer1 = this.playerNameMap["X"];
+      var cssPrefixPlayer2 = this.playerNameMap["O"];
+      return ($square.hasClass(cssPrefixPlayer1 + '-background-image') || $square.hasClass(cssPrefixPlayer2 + '-background-image'));
+    }
+
+    TicTacToe.prototype.updateSquareTile = function ($square) {
+      var cssPrefix = this.playerNameMap[this.currentPlayer];
+      $square.addClass(cssPrefix + '-background-image');
+    }
+
+    TicTacToe.prototype.updateCurrentPlayer = function () {
+      if(this.currentPlayer == 'X') {
+        this.currentPlayer = 'O';
+      } else if(this.currentPlayer == 'O') {
+        this.currentPlayer = 'X';
+      }
+
+      this.updateCurrentPlayerStatus();
+    }
+
+    TicTacToe.prototype.updateCurrentPlayerStatus = function () {
+      $('.current-player-status .player-name').text(this.playerNameMap[this.currentPlayer]);
+    }
+
+    TicTacToe.prototype.playMove = function (squareNumber) {
+      for (var i = 0; i < this.board.length; i++) {
+        for (var y = 0; y < this.board[i].length; y++) {
+          var s = this.board[i][y];
+          if (s == squareNumber) {
+            this.board[i][y] = this.currentPlayer;
+          }
+        }
+      }
+      this.moveCount += 1;
+    }
+
+    TicTacToe.prototype.checkForWinner = function () {
+      if (this.moveCount < 5) return false;
+
+      for (var i = 0; i < this.board.length; i++) {
+        if (this.gameWinner != null) break;
+
+        if (this.board[i].every(function (e) { return e == 'X'; })) {
+          this.gameWinner = 'X';
+        } else if (this.board[i].every(function (e) { return e == 'O'; })) {
+          this.gameWinner = 'O';
+        }
+      }
+    }
+
+    TicTacToe.prototype.congratulateWinner = function () {
+      $('.winner .player-name').text(this.playerNameMap[this.gameWinner]);
+      $('.winner').show();
+    }
+
+    TicTacToe.prototype.draw = function () {
+      $('.draw').show();
+      this.isDraw = true;
+    }
+
+    TicTacToe.prototype.updatePlayerNames = function (player1, player2) {
+      this.updateBoardImages(player1, player2);
+      this.playerNameMap['X'] = player1;
+      this.playerNameMap['O'] = player2;
+      this.updateCurrentPlayerStatus();
+    };
+
+    TicTacToe.prototype.updateBoardImages = function (player1, player2) {
+      var player1CSS = this.playerNameMap['X'] + '-background-image';
+      var player2CSS = this.playerNameMap['O'] + '-background-image';
+      this.$container.find(".square." + player1CSS).removeClass(player1CSS).addClass(player1 + "-background-image");
+      this.$container.find(".square." + player2CSS).removeClass(player2CSS).addClass(player2 + "-background-image");
+    }
+
+    $(document).ready(function() {
+      var game = new TicTacToe($('.board-container'));
+      game.setup();
+
+      function clearBoard () {
+        game.destroy();
+        game = new TicTacToe($('.board-container'));
+        game.setup();
+      }
+
+      $('.restart').click(clearBoard);
+      $('.dogs-and-cats').click(function () { game.updatePlayerNames("Dogs", "Cats"); });
+      $('.x-and-o').click(function () { game.updatePlayerNames("X", "O"); });
+    });
+    </script>
+  </body>
+</html>

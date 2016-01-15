@@ -1,0 +1,92 @@
+body {
+  font-family: helvetica;
+}
+
+.square {
+  height: 200px;
+  width: 200px;
+  border: solid black 8px;
+  display: block;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.row {
+  float: left;
+}
+
+.X-background-image {
+  background-image: url("images/x.png");
+}
+
+.O-background-image {
+  background-image: url("images/o.png");
+}
+
+.Cats-background-image {
+  background-image: url("images/cats.jpg");
+  background-position: center;
+}
+
+.Dogs-background-image {
+  background-image: url("images/dogs.jpg");
+  background-position: center;
+}
+
+.board-container, .game-details {
+  width: 632px;
+  margin: 0 auto;
+}
+
+.board-container {
+  height: 632px;
+  margin-bottom: 40px;
+}
+
+.game-details {
+  clear: left;
+}
+
+.game-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  color: red;
+  font-size: 300%;
+  text-align: center;
+  white-space: nowrap;
+  margin-left: -100px;
+  margin-top: -70px;
+}
+
+.current-player-status {
+  float: right;
+  font-size: 20px;
+  margin-top: 5px;
+}
+
+.controls {
+  float: left;
+}
+
+.controls button {
+  font-size: 20px;
+}
+
+#s-0, #s-1, #s-2 {
+  border-left: none;
+}
+
+#s-0, #s-3, #s-6 {
+  border-top: none;
+}
+
+#s-6, #s-7, #s-8 {
+  border-right: none;
+}
+
+#s-2, #s-5, #s-8 {
+  border-bottom: none;
+}
