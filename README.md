@@ -10,5 +10,3 @@ Demo: http://www.mirabaiapplegate.com/tictactoe/index.html
 ## Features
 
   - Uses Animate.css https://daneden.github.io/animate.css/
-  - Two game modes: - Traditional X's & O's
-                    - Cat's & Dog's
