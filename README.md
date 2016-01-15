@@ -2,8 +2,8 @@
 
 Tic Tac Toe game with CSS animations.  Two game modes: the traditional X and O's and Cats & Dogs.
 
-![](./preview.png)
-![](./animal-preview.png)
+![](.images/preview.png)
+![](.images/animal-preview.png)
 
 Demo: http://www.mirabaiapplegate.com/tictactoe/index.html
 
