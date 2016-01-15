@@ -90,3 +90,12 @@ body {
 #s-2, #s-5, #s-8 {
   border-bottom: none;
 }
+
+button {
+  padding: 3px;
+  margin: 5px;
+}
+
+h1, h4 {
+  margin-left: 20px;
+}
